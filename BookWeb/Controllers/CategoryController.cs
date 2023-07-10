@@ -25,7 +25,7 @@ namespace BookWeb.Controllers
         {
             //if (category.Name == category.DisplayOrder.ToString())
             //{
-            //    ModelState.AddModelError("", "The DisplayOrder cannot exactly match the  Name.");
+            //    ModelState.AddModelError("", "The DisplayOrder cannot exactly match the Name.");
             //}
             if (ModelState.IsValid)
             {
