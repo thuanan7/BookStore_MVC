@@ -31,6 +31,7 @@ namespace BookWeb.Controllers
             {
                 _context.Categories.Add(category);
                 _context.SaveChanges();
+                TempData["success"] = "Category has been created!";
                 return RedirectToAction("Index", "Category");
             }
             return View();
@@ -53,6 +54,7 @@ namespace BookWeb.Controllers
             {
                 _context.Categories.Update(category);
                 _context.SaveChanges();
+                TempData["success"] = "Category has been updated!";
                 return RedirectToAction("Index", "Category");
             }
             return View();
@@ -75,6 +77,7 @@ namespace BookWeb.Controllers
             {
                 _context.Categories.Remove(category);
                 _context.SaveChanges();
+                TempData["success"] = "Category has been deleted!";
                 return RedirectToAction("Index", "Category");
             }
             return NotFound();
