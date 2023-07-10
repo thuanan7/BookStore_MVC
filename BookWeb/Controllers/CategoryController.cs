@@ -16,5 +16,24 @@ namespace BookWeb.Controllers
             List<Category> categoryList = _context.Categories.ToList();
             return View(categoryList);
         }
+        public IActionResult Create()
+        {
+            return View();
+        }
+        [HttpPost]
+        public IActionResult Create(Category category)
+        {
+            //if (category.Name == category.DisplayOrder.ToString())
+            //{
+            //    ModelState.AddModelError("", "The DisplayOrder cannot exactly match the  Name.");
+            //}
+            if (ModelState.IsValid)
+            {
+                _context.Categories.Add(category);
+                _context.SaveChanges();
+                return RedirectToAction("Index", "Category");
+            }
+            return View();
+        }
     }
 }
