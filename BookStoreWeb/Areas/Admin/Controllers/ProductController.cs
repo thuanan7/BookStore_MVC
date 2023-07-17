@@ -1,6 +1,7 @@
 ﻿using BookStore.DataAccess.Repository.IRepository;
 using BookStore.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BookStoreWeb.Areas.Admin.Controllers
 {
@@ -20,6 +21,19 @@ namespace BookStoreWeb.Areas.Admin.Controllers
 
         public IActionResult Create()
         {
+            IEnumerable<SelectListItem> CategorySelectList = _unitOfWork.CategoryRepository.GetAll()
+                .Select(o => new SelectListItem
+                {
+                    Text = o.Name,
+                    Value = o.Id.ToString()
+                });
+
+            //ViewBag will internally insert data with the key to ViewDataDictionary so must not set ViewData and ViewBag have the same key.
+            //ViewBag.CategorySelectList = CategorySelectList;
+            ViewData["CategorySelectList"] = CategorySelectList;
+            
+            //Avoid using ViewBag and ViewData
+
             return View();
         }
 
@@ -42,7 +56,7 @@ namespace BookStoreWeb.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            Product product = _unitOfWork.ProductRepository.Get(p=>p.Id == id);
+            Product product = _unitOfWork.ProductRepository.Get(p => p.Id == id);
             return View(product);
         }
 
