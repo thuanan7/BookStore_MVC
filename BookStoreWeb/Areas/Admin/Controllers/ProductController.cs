@@ -1,5 +1,6 @@
 ﻿using BookStore.DataAccess.Repository.IRepository;
 using BookStore.Models;
+using BookStore.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -30,24 +31,35 @@ namespace BookStoreWeb.Areas.Admin.Controllers
 
             //ViewBag will internally insert data with the key to ViewDataDictionary so must not set ViewData and ViewBag have the same key.
             //ViewBag.CategorySelectList = CategorySelectList;
-            ViewData["CategorySelectList"] = CategorySelectList;
-            
-            //Avoid using ViewBag and ViewData
+            //ViewData["CategorySelectList"] = CategorySelectList;
 
-            return View();
+            //Avoid using ViewBag and ViewData
+            //ViewModel
+            ProductVM productVM = new ProductVM()
+            {
+                CategorySelectList = CategorySelectList,
+                Product = new Product()
+            };
+            return View(productVM);
         }
 
         [HttpPost]
-        public IActionResult Create(Product product)
+        public IActionResult Create(ProductVM productVM)
         {
             if (ModelState.IsValid)
             {
-                _unitOfWork.ProductRepository.Add(product);
+                _unitOfWork.ProductRepository.Add(productVM.Product);
                 _unitOfWork.Save();
                 TempData["success"] = "New Book has been created!";
                 return RedirectToAction("Index", "Product");
             }
-            return View();
+            productVM.CategorySelectList = _unitOfWork.CategoryRepository.GetAll()
+                .Select(o => new SelectListItem
+                {
+                    Text = o.Name,
+                    Value = o.Id.ToString()
+                });
+            return View(productVM);
         }
 
         public IActionResult Edit(int? id)
