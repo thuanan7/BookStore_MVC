@@ -20,7 +20,7 @@ namespace BookStoreWeb.Areas.Admin.Controllers
         }
         public IActionResult Index()
         {
-            List<Product> products = _unitOfWork.ProductRepository.GetAll(includeProperties:"Category").ToList();
+            List<Product> products = _unitOfWork.ProductRepository.GetAll(includeProperties: "Category").ToList();
 
             return View(products);
         }
@@ -59,12 +59,12 @@ namespace BookStoreWeb.Areas.Admin.Controllers
                     if (!String.IsNullOrEmpty(productVM.Product.ImageUrl))
                     {
                         string oldFilePath = Path.Combine(wwwRootPath, productVM.Product.ImageUrl.TrimStart('\\'));
-                        if(System.IO.File.Exists(oldFilePath))
+                        if (System.IO.File.Exists(oldFilePath))
                         {
                             System.IO.File.Delete(oldFilePath);
                         }
                     }
-                    
+
 
                     using (var stream = new FileStream(Path.Combine(path, fileName), FileMode.Create))
                     {
@@ -80,7 +80,7 @@ namespace BookStoreWeb.Areas.Admin.Controllers
                 {
                     _unitOfWork.ProductRepository.Update(productVM.Product);
                 }
-                
+
                 _unitOfWork.Save();
                 TempData["success"] = "New Book has been created!";
 
@@ -96,29 +96,40 @@ namespace BookStoreWeb.Areas.Admin.Controllers
             return View(productVM);
         }
 
-        [ActionName("Delete")]
-        public IActionResult DeleteConfirm(int? id)
+        #region API CALL
+        [HttpGet]
+        public IActionResult GetAll()
         {
-            if (id == null || id <= 0)
-            {
-                return NotFound();
-            }
-            Product product = _unitOfWork.ProductRepository.Get(p => p.Id == id);
-            return View(product);
+            List<Product> products = _unitOfWork.ProductRepository.GetAll(includeProperties: "Category").ToList();
+            return Json(new { data = products });
         }
 
-        [HttpPost]
+
         public IActionResult Delete(int? id)
         {
-            Product? product = _unitOfWork.ProductRepository.Get(p => p.Id == id);
-            if (product != null)
+            if (id == null)
             {
-                _unitOfWork.ProductRepository.Remove(product);
-                _unitOfWork.Save();
-                TempData["success"] = "Book has been deleted!";
-                return RedirectToAction("Index", "Product");
+                return Json(new { success = false, message = "Error while delecting" });
             }
-            return View();
+
+            Product productToDelete = _unitOfWork.ProductRepository.Get(o => o.Id == id);
+            if (productToDelete == null)
+            {
+                return Json(new { success = false, message = "Error while delecting" });
+            }
+
+            string oldFilePath = Path.Combine(_webHostEnvironment.WebRootPath,
+                productToDelete.ImageUrl.TrimStart('\\'));
+
+            if (System.IO.File.Exists(oldFilePath))
+            {
+                System.IO.File.Delete(oldFilePath);
+            }
+
+            _unitOfWork.ProductRepository.Remove(productToDelete);
+            _unitOfWork.Save();
+            return Json(new { success = true, message = "Delete Successfully!" });
         }
+        #endregion
     }
 }
