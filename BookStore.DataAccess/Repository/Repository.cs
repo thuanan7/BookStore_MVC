@@ -26,16 +26,32 @@ namespace BookStore.DataAccess.Repository
             dbSet.Add(entity);
         }
 
-        public T Get(Expression<Func<T, bool>> filter)
+        public T Get(Expression<Func<T, bool>> filter, string? includeProperties = null)
         {
             IQueryable<T> query = dbSet.Where(filter);
+            //includeProperties: "Category, Covertype, ..."
+            if (!String.IsNullOrEmpty(includeProperties))
+            {
+                foreach (var prop in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query.Include(prop);
+                }
+            }
             return query.FirstOrDefault();
         }
 
-        public IEnumerable<T> GetAll()
+        public IEnumerable<T> GetAll(string? includeProperties = null)
         {
             //DbSet<T> và DbSet là class implement IQueryable và IQueryable<T>
             IQueryable<T> query = dbSet;
+            //includeProperties: Category, Covertype...
+            if (!String.IsNullOrEmpty(includeProperties))
+            {
+                foreach (var prop in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(prop);
+                }
+            }
             return query.ToList();
         }
 

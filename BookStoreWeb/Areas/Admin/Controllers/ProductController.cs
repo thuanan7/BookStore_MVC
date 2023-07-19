@@ -20,7 +20,8 @@ namespace BookStoreWeb.Areas.Admin.Controllers
         }
         public IActionResult Index()
         {
-            List<Product> products = _unitOfWork.ProductRepository.GetAll().ToList();
+            List<Product> products = _unitOfWork.ProductRepository.GetAll(includeProperties:"Category").ToList();
+
             return View(products);
         }
 
