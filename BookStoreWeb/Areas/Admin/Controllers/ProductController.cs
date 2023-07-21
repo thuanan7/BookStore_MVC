@@ -1,6 +1,8 @@
 ﻿using BookStore.DataAccess.Repository.IRepository;
 using BookStore.Models;
 using BookStore.Models.ViewModels;
+using BookStore.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore.Query.Internal;
@@ -9,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace BookStoreWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    //[Authorize(Roles = SD.Role_Admin)]
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -40,6 +43,7 @@ namespace BookStoreWeb.Areas.Admin.Controllers
             };
             if (id != null && id != 0)
             {
+                //if update
                 productVM.Product = _unitOfWork.ProductRepository.Get(u => u.Id == id);
             }
             return View(productVM);
