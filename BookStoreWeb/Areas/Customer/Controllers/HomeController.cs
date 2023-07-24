@@ -43,7 +43,20 @@ namespace BookStoreWeb.Areas.Customer.Controllers
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
             shoppingCart.ApplicationUserId = userId;
 
-            _unitOfWork.ShoppingCartRepository.Add(shoppingCart);
+            var cartFromDb = _unitOfWork.ShoppingCartRepository.Get(c=>c.ApplicationUserId == userId && c.ProductId == shoppingCart.ProductId);
+
+            if (cartFromDb != null)
+            {
+                cartFromDb.Count += shoppingCart.Count;
+                //Dont have to because EFCore automatically track what you get from db
+                //_unitOfWork.ShoppingCartRepository.Update(cartFromDb);
+            }
+            else
+            {
+                _unitOfWork.ShoppingCartRepository.Add(shoppingCart);
+            }
+            TempData["success"] = "Cart updated sucessfully!";
+
             _unitOfWork.Save();
 
             return RedirectToAction(nameof(Index));
