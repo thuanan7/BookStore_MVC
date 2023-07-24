@@ -1,7 +1,9 @@
 using BookStore.DataAccess.Repository.IRepository;
 using BookStore.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace BookStoreWeb.Areas.Customer.Controllers
 {
@@ -22,15 +24,29 @@ namespace BookStoreWeb.Areas.Customer.Controllers
             return View(products);
         }
 
-        public IActionResult Details(int id)
+        public IActionResult Details(int productId)
         {
             ShoppingCart cart = new()
             {
-                Product = _unitOfWork.ProductRepository.Get(u => u.Id == id, includeProperties: "Category"),
+                Product = _unitOfWork.ProductRepository.Get(u => u.Id == productId, includeProperties: "Category"),
                 Count = 1,
-                ProductId = id
+                ProductId = productId
             };
             return View(cart);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public IActionResult Details(ShoppingCart shoppingCart)
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+            shoppingCart.ApplicationUserId = userId;
+
+            _unitOfWork.ShoppingCartRepository.Add(shoppingCart);
+            _unitOfWork.Save();
+
+            return RedirectToAction(nameof(Index));
         }
 
         public IActionResult Privacy()
