@@ -19,7 +19,7 @@ namespace BookStore.DataAccess.Repository
 
         public void Update(Company company)
         {
-            _context.Update(company);
+            _context.Companies.Update(company);
         }
     }
 }

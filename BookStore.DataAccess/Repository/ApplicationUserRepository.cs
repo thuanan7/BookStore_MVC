@@ -19,7 +19,7 @@ namespace BookStore.DataAccess.Repository
 
         public void Update(ApplicationUser applicationUser)
         {
-            _context.Update(applicationUser);
+            _context.ApplicationUser.Update(applicationUser);
         }
     }
 }
