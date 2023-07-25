@@ -40,10 +40,15 @@ namespace BookStore.DataAccess.Repository
             return query.FirstOrDefault();
         }
 
-        public IEnumerable<T> GetAll(string? includeProperties = null)
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
         {
             //DbSet<T> và DbSet là class implement IQueryable và IQueryable<T>
             IQueryable<T> query = dbSet;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
             //includeProperties: Category, Covertype...
             if (!String.IsNullOrEmpty(includeProperties))
             {
