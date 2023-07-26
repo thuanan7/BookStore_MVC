@@ -1,9 +1,11 @@
 ﻿using BookStore.DataAccess.Repository.IRepository;
 using BookStore.Models;
+using BookStore.Utility;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookStoreWeb.Areas.Admin.Controllers
 {
+	[Area(SD.Role_Admin)]
 	public class OrderController : Controller
 	{
 		private readonly IUnitOfWork _unitOfWork;
