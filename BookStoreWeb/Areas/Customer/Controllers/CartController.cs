@@ -160,6 +160,26 @@ namespace BookStoreWeb.Areas.Customer.Controllers
 
 		public IActionResult OrderConfirmation(int id)
 		{
+			OrderHeader orderHeader = _unitOfWork.OrderHeaderRepository.Get(u => u.Id == id);
+			if (orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
+			{
+				// this is an order by customer
+
+				var service = new SessionService();
+				Session session = service.Get(orderHeader.SessionId);
+
+				if (session.PaymentStatus.ToLower() == "paid")
+				{
+					_unitOfWork.OrderHeaderRepository.UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
+					_unitOfWork.OrderHeaderRepository.UpdateStatus(id, SD.StatusApproved, SD.PaymentStatusApproved);
+				}
+			}
+
+			List<ShoppingCart> shoppingCartList = _unitOfWork.ShoppingCartRepository
+				.GetAll(u => u.ApplicationUserId == orderHeader.ApplicationUserId).ToList();
+			_unitOfWork.ShoppingCartRepository.RemoveRange(shoppingCartList);
+
+			_unitOfWork.Save();
 			return View(id);
 		}
 
