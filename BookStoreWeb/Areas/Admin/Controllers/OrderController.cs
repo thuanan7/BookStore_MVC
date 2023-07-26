@@ -2,6 +2,7 @@
 using BookStore.Models;
 using BookStore.Utility;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace BookStoreWeb.Areas.Admin.Controllers
 {
@@ -22,10 +23,27 @@ namespace BookStoreWeb.Areas.Admin.Controllers
 		#region API CALL
 
 		[HttpGet]
-		public IActionResult GetAll()
+		public IActionResult GetAll(string status)
 		{
-			List<OrderHeader> orderHeaders = _unitOfWork.OrderHeaderRepository.GetAll(includeProperties: "ApplicationUser").ToList();
-			return Json(new { data = orderHeaders });
+			IEnumerable<OrderHeader> orderHeaders = _unitOfWork.OrderHeaderRepository.GetAll(includeProperties: "ApplicationUser").ToList();
+            switch (status)
+            {
+                case "pending":
+                    orderHeaders = orderHeaders.Where(u => u.OrderStatus == SD.StatusPending);
+                    break;
+                case "inprocess":
+                    orderHeaders = orderHeaders.Where(u => u.OrderStatus == SD.StatusInProcess);
+                    break;
+                case "completed":
+                    orderHeaders = orderHeaders.Where(u => u.OrderStatus == SD.StatusShipped);
+                    break;
+                case "approved":
+                    orderHeaders = orderHeaders.Where(u => u.OrderStatus == SD.StatusApproved);
+                    break;
+                default:
+                    break;
+            }
+            return Json(new { data = orderHeaders });
 		}
 
 		#endregion
