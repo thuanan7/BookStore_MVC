@@ -1,31 +1,42 @@
 ﻿using BookStore.DataAccess.Repository.IRepository;
 using BookStore.Models;
+using BookStore.Models.ViewModels;
 using BookStore.Utility;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 namespace BookStoreWeb.Areas.Admin.Controllers
 {
-	[Area(SD.Role_Admin)]
-	public class OrderController : Controller
-	{
-		private readonly IUnitOfWork _unitOfWork;
+    [Area(SD.Role_Admin)]
+    public class OrderController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
 
         public OrderController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
         public IActionResult Index()
-		{
-			return View();
-		}
+        {
+            return View();
+        }
 
-		#region API CALL
+        public IActionResult Details(int orderId)
+        {
+            OrderVM orderVM = new()
+            {
+                OrderHeader = _unitOfWork.OrderHeaderRepository.Get(u => u.Id == orderId, includeProperties: "ApplicationUser"),
+                OrderDetails = _unitOfWork.OrderDetailRepository.GetAll(u => u.OrderHeaderId == orderId, includeProperties: "Product")
+            };
+            return View(orderVM);
+        }
 
-		[HttpGet]
-		public IActionResult GetAll(string status)
-		{
-			IEnumerable<OrderHeader> orderHeaders = _unitOfWork.OrderHeaderRepository.GetAll(includeProperties: "ApplicationUser").ToList();
+        #region API CALL
+
+        [HttpGet]
+        public IActionResult GetAll(string status)
+        {
+            IEnumerable<OrderHeader> orderHeaders = _unitOfWork.OrderHeaderRepository.GetAll(includeProperties: "ApplicationUser").ToList();
             switch (status)
             {
                 case "pending":
@@ -44,8 +55,8 @@ namespace BookStoreWeb.Areas.Admin.Controllers
                     break;
             }
             return Json(new { data = orderHeaders });
-		}
+        }
 
-		#endregion
-	}
+        #endregion
+    }
 }

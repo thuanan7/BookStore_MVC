@@ -34,7 +34,7 @@ namespace BookStore.DataAccess.Repository
             {
                 foreach (var prop in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    query.Include(prop);
+                    query = query.Include(prop);
                 }
             }
             return query.FirstOrDefault();
