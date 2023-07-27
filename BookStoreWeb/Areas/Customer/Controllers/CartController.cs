@@ -175,6 +175,8 @@ namespace BookStoreWeb.Areas.Customer.Controllers
                 }
             }
 
+            HttpContext.Session.Clear();
+
             List<ShoppingCart> shoppingCartList = _unitOfWork.ShoppingCartRepository
                 .GetAll(u => u.ApplicationUserId == orderHeader.ApplicationUserId).ToList();
             _unitOfWork.ShoppingCartRepository.RemoveRange(shoppingCartList);
