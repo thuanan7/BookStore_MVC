@@ -53,5 +53,5 @@ jobs:
         with:
           app-name: 'bookstoremvc-thuanan'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_99DB04B9E8414AFEA3EF7E6B399F0F28 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C580DFC193E84BE38F8D173C1A00E8C7 }}
           package: .
