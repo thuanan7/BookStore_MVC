@@ -4,6 +4,7 @@ using BookStore.Models.ViewModels;
 using BookStore.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
 using System.Diagnostics;
 using System.Security.Claims;
 
@@ -92,6 +93,37 @@ namespace BookStoreWeb.Areas.Admin.Controllers
             _unitOfWork.Save();
 
             TempData["Success"] = "Order Shipped Successfully!";
+            return RedirectToAction(nameof(Details), new { orderId = OrderVM.OrderHeader.Id });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
+        public IActionResult CancelOrder()
+        {
+            var orderHeader = _unitOfWork.OrderHeaderRepository.Get(u => u.Id == OrderVM.OrderHeader.Id);
+            if (orderHeader.PaymentStatus == SD.PaymentStatusApproved)
+            {
+                var options = new RefundCreateOptions
+                {
+                    Reason = RefundReasons.RequestedByCustomer,
+                    PaymentIntent = orderHeader.PaymentIntentId
+                };
+
+                var service = new RefundService();
+                Refund refund = service.Create(options);
+
+                orderHeader.OrderStatus = SD.StatusCancelled;
+                orderHeader.PaymentStatus = SD.StatusRefunded;
+            }
+            else
+            {
+                orderHeader.OrderStatus = SD.StatusCancelled;
+                orderHeader.PaymentStatus = SD.StatusCancelled;
+            }
+
+            _unitOfWork.Save();
+
+            TempData["Success"] = "Order Cancelled Successfully!";
             return RedirectToAction(nameof(Details), new { orderId = OrderVM.OrderHeader.Id });
         }
 
