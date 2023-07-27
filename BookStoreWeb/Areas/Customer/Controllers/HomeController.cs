@@ -1,6 +1,8 @@
 using BookStore.DataAccess.Repository.IRepository;
 using BookStore.Models;
+using BookStore.Utility;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Security.Claims;
@@ -50,14 +52,19 @@ namespace BookStoreWeb.Areas.Customer.Controllers
                 cartFromDb.Count += shoppingCart.Count;
                 //Dont have to because EFCore automatically track what you get from db
                 //_unitOfWork.ShoppingCartRepository.Update(cartFromDb);
+                _unitOfWork.Save();
             }
             else
             {
+                //add cart record
                 _unitOfWork.ShoppingCartRepository.Add(shoppingCart);
+                _unitOfWork.Save();
+
+                HttpContext.Session.SetInt32(SD.SessionCart,
+                    _unitOfWork.ShoppingCartRepository.GetAll(c => c.ApplicationUserId == userId).Count());
             }
             TempData["success"] = "Cart updated sucessfully!";
 
-            _unitOfWork.Save();
 
             return RedirectToAction(nameof(Index));
         }
