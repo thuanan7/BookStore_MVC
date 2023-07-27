@@ -124,7 +124,7 @@
                                 <div class="col-9">
                                     @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
                                     {
-                                        <input asp-for="OrderHeader.Carrier" type="text" class="form-control">
+                                        <input id="carrier" asp-for="OrderHeader.Carrier" type="text" class="form-control">
                                     }
                                     else
                                     {
@@ -137,7 +137,7 @@
                                 <div class="col-9">
                                     @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
                                     {
-                                        <input asp-for="OrderHeader.TrackingNumber" type="text" class="form-control">
+                                        <input id="trackingNumber" asp-for="OrderHeader.TrackingNumber" type="text" class="form-control">
                                     }
                                     else
                                     {
@@ -234,25 +234,27 @@
                                     </div>
                                 </li>
                             </ul>
-                            @if (User.IsInRole("Company"))
+
+                            @if (Model.OrderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment &&
+                            Model.OrderHeader.OrderStatus == SD.StatusShipped)
                             {
-                                @if (Model.OrderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment &&
-                               Model.OrderHeader.OrderStatus == SD.StatusShipped)
-                                {
-                                    <button type="submit" class="btn btn-success form-control my-1">Pay Now</button>
-                                }
+                                <button type="submit" class="btn btn-success form-control my-1">Pay Now</button>
                             }
+
 
                             @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
                             {
                                 if (Model.OrderHeader.OrderStatus == SD.StatusApproved)
                                 {
-                                    <button type="submit" class="btn btn-primary form-control my-1">Start Processing</button>
+                                    <button type="submit" asp-action="StartProcessing"
+                                            class="btn btn-primary form-control my-1">
+                                        Start Processing
+                                    </button>
                                 }
 
                                 if (Model.OrderHeader.OrderStatus == SD.StatusInProcess)
                                 {
-                                    <button type="submit" class="btn btn-primary form-control my-1">Ship Order</button>
+                                    <button type="submit" asp-action="ShipOrder" onclick="validateInput(event)" class="btn btn-primary form-control my-1">Ship Order</button>
                                 }
 
                                 if (Model.OrderHeader.OrderStatus != SD.StatusRefunded &&
@@ -269,3 +271,26 @@
         </div>
     </div>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function validateInput(e) {
+            if (!document.getElementById("trackingNumber").value.trim()) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please enter tracking number!',
+                })
+                e.preventDefault();
+            } else if (!document.getElementById("carrier").value.trim()) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please enter carrier!',
+                })
+                e.preventDefault();
+            }
+        }
+    </script>
+}

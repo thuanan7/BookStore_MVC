@@ -10,6 +10,7 @@ using System.Security.Claims;
 namespace BookStoreWeb.Areas.Admin.Controllers
 {
     [Area(SD.Role_Admin)]
+    [Authorize]
     public class OrderController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -21,7 +22,7 @@ namespace BookStoreWeb.Areas.Admin.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [Authorize]
+        
         public IActionResult Index()
         {
             return View();
@@ -62,6 +63,38 @@ namespace BookStoreWeb.Areas.Admin.Controllers
             TempData["Success"] = "Order Details Updated Successfully!";
             return RedirectToAction(nameof(Details), new { orderId = orderHeaderFromDb.Id });
         }
+
+        [HttpPost]
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
+        public IActionResult StartProcessing()
+        {
+            _unitOfWork.OrderHeaderRepository.UpdateStatus(OrderVM.OrderHeader.Id, SD.StatusInProcess);
+            _unitOfWork.Save();
+
+            TempData["Success"] = "Order Details Updated Successfully!";
+            return RedirectToAction(nameof(Details), new { orderId = OrderVM.OrderHeader.Id });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
+        public IActionResult ShipOrder()
+        {
+            var orderHeader = _unitOfWork.OrderHeaderRepository.Get(u => u.Id == OrderVM.OrderHeader.Id);
+            orderHeader.TrackingNumber = OrderVM.OrderHeader.TrackingNumber;
+            orderHeader.Carrier = OrderVM.OrderHeader.Carrier;
+            orderHeader.OrderStatus = SD.StatusShipped;
+            orderHeader.ShippingDate = DateTime.Now;
+            if (orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment)
+            {
+                orderHeader.PaymentDueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
+            }
+
+            _unitOfWork.Save();
+
+            TempData["Success"] = "Order Shipped Successfully!";
+            return RedirectToAction(nameof(Details), new { orderId = OrderVM.OrderHeader.Id });
+        }
+
         #region API CALL
 
         [HttpGet]
