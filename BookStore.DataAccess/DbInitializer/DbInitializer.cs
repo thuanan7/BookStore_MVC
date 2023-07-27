@@ -58,7 +58,7 @@ namespace BookStore.DataAccess.DbInitializer
                     City = "HCM"
                 }, "Asddsaas1#").GetAwaiter().GetResult();
 
-                ApplicationUser user = _context.ApplicationUser.FirstOrDefault(u => u.Email == "thuanan7@gmail.com");
+                ApplicationUser user = _context.ApplicationUser.FirstOrDefault(u => u.Email == "thuanan7@admin");
                 _userManager.AddToRoleAsync(user, SD.Role_Admin).GetAwaiter().GetResult();
             }
             return;
